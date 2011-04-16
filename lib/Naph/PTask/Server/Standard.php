@@ -22,6 +22,8 @@ class Standard implements \Naph\PTask\Server {
      */
     public function listen( $port, $workerCount=10 ) {
 
+        echo "\nStarting on port $port with $workerCount workers...\n\n";
+
         for ( $i=1; $i<=$workerCount; $i++ ) {
 
             $pid = pcntl_fork();
@@ -33,9 +35,14 @@ class Standard implements \Naph\PTask\Server {
                     break;
 
                 case 0:
-                    $this->initAsWorker( $port );
+                    while ( true ) {
+                        $this->initAsWorker( $port );
+                        echo "Worker quit, restarting...\n";
+                    }
                     exit;
                     break;
+
+                // @todo handle zombie processes
 
             }
 
@@ -71,13 +78,13 @@ class Standard implements \Naph\PTask\Server {
 
             $job = unserialize( $pull->recv() );
 
-            echo "## WORKER #$id Processing Job!\n";
+            echo "#$id Processing\n";
 
-            sleep( rand( 2, 5 ) );
+            sleep( rand( 1, 2 ) );
 
             $job->setResult( 'PROCESSED BY WORKER' );
 
-            echo "## WORKER #$id Complete!\n";
+            echo "#$id Done\n";
 
             $push->send(serialize( $job ));
             
@@ -102,7 +109,7 @@ class Standard implements \Naph\PTask\Server {
         $push->bind( 'tcp://*:' . $pushPort );
 
         $pull = $ctx->getSocket( ZMQ::SOCKET_PULL );
-        $pull->connect( 'tcp://127.0.0.1:' . $pullPort );
+        $pull->bind( 'tcp://*:' . $pullPort );
 
         $poll = new ZMQPoll();
         $poll->add( $req, ZMQ::POLL_IN );
@@ -121,24 +128,29 @@ class Standard implements \Naph\PTask\Server {
                 foreach ( $readable as $socket ) {
                     if ( $socket == $req ) {
 
-                                    $jobs = unserialize( $socket->recv() );
+                        //
+                        //  JOBS REQUEST RECEIVED !!!
+                        //
+                        
+                        $jobs = unserialize( $req->recv() );
+                        echo "\nGot " . count($jobs) . " jobs\n";
+                        $req->send(serialize( $jobs ));
 
-                                    echo "\n\nGot " . count($jobs) . " jobs\n";
-
-                                    foreach ( $jobs as $job ) {
-                                        $push->send(serialize( $job ));
-                                    }
-
-                                    echo "Sending Response\n";
-
-                                    $socket->send(serialize( $jobs ));
-
+                        foreach ( $jobs as $job ) {
+                            $push->send(serialize( $job ));
+                        }
 
                     }
 
                     else if ( $socket == $pull ) {
-                        $socket->recv();
-                        echo "GOT PULL RESPONSE FROM WORKER !!!\n";
+
+                        //
+                        //  WORKER HAS COMPLETED !!!
+                        //
+
+                        $pull->recv();
+                        echo "** GOT PULL RESPONSE FROM WORKER !!!\n";
+
                     }
                 }
 

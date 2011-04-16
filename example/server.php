@@ -13,4 +13,4 @@ class MyProcessor implements Naph\PTask\Processor {
 $processor = new MyProcessor();
 
 $server = new Naph\PTask\Server\Standard();
-$server->listen( 5555, 3 );
+$server->listen( 5555, 10 );
