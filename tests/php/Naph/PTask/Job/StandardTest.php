@@ -33,4 +33,13 @@ class StandardTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals( 'bar', $this->job->foo );
     }
 
+    public function testResultCanBeSetAndGotten() {
+        $this->job->setResult( 'foo' );
+        $this->assertEquals( 'foo', $this->job->getResult() );
+    }
+
+    public function testResultIsNullWhenJobHasntBeenProcessed() {
+        $this->assertNull( $this->job->getResult() );
+    }
+
 }

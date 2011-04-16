@@ -14,6 +14,11 @@ class Standard implements \Naph\PTask\Job {
     protected $data;
 
     /**
+     * @var mixed result of processing job
+     */
+    protected $result;
+
+    /**
      * Create a new blank job
      *
      */
@@ -76,12 +81,25 @@ class Standard implements \Naph\PTask\Job {
     }
 
     /**
+     * Sets the result of processing a job
+     *
+     * @param mixed $result
+     */
+    public function setResult( $result ) {
+        
+        $this->result = $result;
+        
+    }
+
+    /**
      * Return the result of processing the job
      *
      * @return mixed
      */
     public function getResult() {
         
+        return $this->result;
+
     }
 
 }

@@ -26,6 +26,13 @@ interface Job {
     public function getParam( $name );
 
     /**
+     * Sets the result of processing the job
+     *
+     * @param mixed $result
+     */
+    public function setResult( $result );
+
+    /**
      * Returns the result of processing the job
      *
      * @return mixed
