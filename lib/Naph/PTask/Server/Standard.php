@@ -37,7 +37,7 @@ class Standard implements \Naph\PTask\Server {
                 case 0:
                     while ( true ) {
                         $this->initAsWorker( $port );
-                        echo "Worker quit, restarting...\n";
+                        exit;
                     }
                     exit;
                     break;
@@ -80,8 +80,6 @@ class Standard implements \Naph\PTask\Server {
 
             echo "#$id Processing\n";
 
-            sleep( rand( 1, 2 ) );
-
             $job->setResult( 'PROCESSED BY WORKER' );
 
             echo "#$id Done\n";
@@ -102,7 +100,7 @@ class Standard implements \Naph\PTask\Server {
 
         $ctx = new ZMQContext( 1 );
 
-        $req = $ctx->getSocket( ZMQ::SOCKET_REP );
+        $req = $ctx->getSocket( ZMQ::SOCKET_XREP );
         $req->bind( 'tcp://*:' . $port );
 
         $push = $ctx->getSocket( ZMQ::SOCKET_PUSH );
@@ -131,14 +129,16 @@ class Standard implements \Naph\PTask\Server {
                         //
                         //  JOBS REQUEST RECEIVED !!!
                         //
-                        
+
                         $jobs = unserialize( $req->recv() );
+
                         echo "\nGot " . count($jobs) . " jobs\n";
-                        $req->send(serialize( $jobs ));
 
                         foreach ( $jobs as $job ) {
                             $push->send(serialize( $job ));
                         }
+
+                        $req->send(serialize( $jobs ));
 
                     }
 
