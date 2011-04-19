@@ -17,6 +17,7 @@ for ( $i=1; $i<=3; $i++ ) {
 // jobs when they are complete.
 
 $runner = new Naph\PTask\Runner\Standard();
+$runner->setLoggingEnabled( true );
 $jobs = $runner->run(
     $jobs
 );

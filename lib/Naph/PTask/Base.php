@@ -9,15 +9,33 @@ namespace Naph\PTask;
 class Base {
 
     /**
+     * @var bool indicates if logging is enabled
+     */
+    protected $loggingEnabled = false;
+
+    /**
      * Log a message
      *
      * @param string $class
      * @param string $message
      */
     protected function log( $class, $message ) {
+
+        if ( $this->loggingEnabled ) {
+            echo sprintf( "%s: %s\n", $class, $message );
+        }
         
-        echo sprintf( "%s: %s\n", $class, $message );
-        
+    }
+
+    /**
+     * Enables or disables logging
+     *
+     * @param bool $loggingEnabled
+     */
+    public function setLoggingEnabled( $loggingEnabled ) {
+
+        $this->loggingEnabled = (bool) $loggingEnabled;
+
     }
 
     /**
@@ -25,7 +43,7 @@ class Base {
      *
      * @return string
      */
-    public function generateId() {
+    protected function generateId() {
     
         $id = '';
 

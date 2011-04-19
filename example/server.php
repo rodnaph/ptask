@@ -2,11 +2,14 @@
 
 include __DIR__ . '/../lib/bootstrap.php';
 
+use Naph\PTask\Base;
+use Naph\PTask\Processor;
+
 /**
  * Example class to show how to implement a basic job processor
  * 
  */
-class ExampleProcessor extends Naph\PTask\Base implements Naph\PTask\Processor {
+class ExampleProcessor extends Base implements Processor {
 
     /**
      * Process a job, just set the result to a message indicating when the job
@@ -34,10 +37,12 @@ class ExampleProcessor extends Naph\PTask\Base implements Naph\PTask\Processor {
 // your jobs can do some real useful work.
 
 $processor = new ExampleProcessor();
+$processor->setLoggingEnabled( true );
 
 // start the server and listen for submitted jobs.  this will continue forever
 // until the server is stopped.  You can specify the number of worker threads
 // to use.  If these die because of fatal errors then they will be restarted (@todo)
 
 $server = new Naph\PTask\Server\Standard( $processor );
+$server->setLoggingEnabled( true );
 $server->listen();
