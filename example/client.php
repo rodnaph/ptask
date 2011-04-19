@@ -2,14 +2,16 @@
 
 include __DIR__ . '/../lib/bootstrap.php';
 
-$jobs = array(
-    new Naph\PTask\Job\Standard(),
-    new Naph\PTask\Job\Standard(),
-    new Naph\PTask\Job\Standard()
-);
+$jobs = array();
+
+for ( $i=1; $i<=3; $i++ ) {
+    $job = new Naph\PTask\Job\Standard();
+    $job->setParam( 'id', $i );
+    $jobs[] = $job;
+}
 
 $runner = new Naph\PTask\Runner\Standard();
-$runner->run(
+$jobs = $runner->run(
     $jobs,
     5555
 );

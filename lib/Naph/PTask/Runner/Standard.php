@@ -16,7 +16,6 @@ class Standard extends Base implements Runner {
 
         $ctx = new ZMQContext();
         $req = $ctx->getSocket( ZMQ::SOCKET_REQ );
-        //$req->setSockOpt( ZMQ::SOCKOPT_IDENTITY, $id );
         $req->connect( 'tcp://localhost:' . $port );
         
         $req->send(serialize( $jobs ));
