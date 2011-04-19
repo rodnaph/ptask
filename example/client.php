@@ -6,7 +6,7 @@ include __DIR__ . '/../lib/bootstrap.php';
 
 $jobs = array();
 
-for ( $i=1; $i<=3; $i++ ) {
+for ( $i=1; $i<=10; $i++ ) {
     $job = new Naph\PTask\Job\Standard();
     $job->setParam( 'id', $i );
     $jobs[] = $job;
@@ -28,5 +28,9 @@ $jobs = $runner->run(
 echo "Results:\n";
 
 foreach ( $jobs as $job ) {
-    echo "\tJob: {$job->getResult()}\n";
+    echo "\t";
+    echo $job == null
+        ? 'Job caused an error'
+        : "Job: {$job->getResult()}";
+    echo "\n";
 }

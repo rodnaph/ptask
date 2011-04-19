@@ -19,6 +19,7 @@ class ExampleProcessor extends Base implements Processor {
      */
     public function process( Naph\PTask\Job $job ) {
 
+        $result = 'Started at ' . date('H:i:s');
         $sleep =  rand( 1, 3 );
 
         $this->log( __CLASS__, "Processing job id " . $job->getParam('id') );
@@ -26,7 +27,9 @@ class ExampleProcessor extends Base implements Processor {
 
         sleep( $sleep );
 
-        $job->setResult( 'Done at ' . date('H:i:s') );
+        $result .= ', and finished at ' . date('H:i:s');
+
+        $job->setResult( $result );
 
     }
     

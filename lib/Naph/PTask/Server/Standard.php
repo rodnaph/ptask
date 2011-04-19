@@ -41,28 +41,41 @@ class Standard extends Base implements Server {
         $this->log( __CLASS__, "Starting server on port $port with $workerCount workers" );
 
         for ( $i=1; $i<=$workerCount; $i++ ) {
-
-            $pid = pcntl_fork();
-
-            switch ( $pid ) {
-
-                case -1:
-                    $this->log( __CLASS__, 'Forking workder process failed :(' );
-                    exit;
-                    break;
-
-                case 0:
-                    $this->initAsWorker( $port );
-                    exit;
-                    break;
-
-                // @todo handle zombie processes
-
-            }
-
+            $this->spawnWorker( $port );
         }
 
-        $this->initAsMaster( $port );
+        if ( pcntl_fork() === 0 ) {
+            $this->initAsMaster( $port );
+        }
+
+        while (pcntl_waitpid(0, $status) != -1) {
+            $this->spawnWorker();
+        }
+
+    }
+
+    /**
+     * Spawn a worker process
+     *
+     * @param int $port
+     */
+    protected function spawnWorker( $port ) {
+
+        $pid = pcntl_fork();
+
+        switch ( $pid ) {
+
+            case -1:
+                $this->log( __CLASS__, 'Forking workder process failed :(' );
+                exit;
+                break;
+
+            case 0:
+                $this->initAsWorker( $port );
+                exit;
+                break;
+
+        }
 
     }
 
@@ -84,6 +97,11 @@ class Standard extends Base implements Server {
 
         $zmsg = new ZMsg( $worker );
 
+        \register_shutdown_function(function() use ( $zmsg ) {
+            $zmsg->body_set( null );
+            $zmsg->send();
+        });
+
         while ( true ) {
 
             $zmsg->recv();
@@ -91,7 +109,6 @@ class Standard extends Base implements Server {
             $this->log( __CLASS__, "Worker $id received job" );
 
             $job = unserialize( $zmsg->body() );
-
             $this->processor->process( $job );
 
             $this->log( __CLASS__, "Worker #$id finished processing job" );
