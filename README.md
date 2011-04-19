@@ -22,12 +22,3 @@ foreach ( $jobs as $job ) {
 
 # Job Example
 
-# Amaxus Example
-
-$job = new Naph\PTask\Job\Standard();
-$job->type = 'processBlock';
-$job->blockId = 123;
-
-$prunner->run(array( $job ));
-
-// $job->getResult() will return the processed block!
