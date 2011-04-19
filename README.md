@@ -1,4 +1,8 @@
 
+# DISCLAIMER
+
+This project does not yet work - it's just code i'm playing with.  Everything below is speculative and just an aid to thought.
+
 # Server Example
 
 <pre>
