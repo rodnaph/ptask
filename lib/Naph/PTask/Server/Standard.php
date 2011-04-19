@@ -95,7 +95,8 @@ class Standard extends Base implements \Naph\PTask\Server {
 
             $this->log( __CLASS__, "Worker #$id finished processing job" );
 
-            $zmsg->send(serialize( $job ));
+            $zmsg->body_set(serialize( $job ));
+            $zmsg->send();
             
         }
 
