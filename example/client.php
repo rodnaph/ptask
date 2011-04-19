@@ -2,6 +2,8 @@
 
 include __DIR__ . '/../lib/bootstrap.php';
 
+// create 3 jobs that we'll submit to the server for processing.
+
 $jobs = array();
 
 for ( $i=1; $i<=3; $i++ ) {
@@ -10,11 +12,18 @@ for ( $i=1; $i<=3; $i++ ) {
     $jobs[] = $job;
 }
 
+// create our job runner, this will handle submitting the jobs to the server
+// that is listening on the specified port, and then returning the processed
+// jobs when they are complete.
+
 $runner = new Naph\PTask\Runner\Standard();
 $jobs = $runner->run(
     $jobs,
     5555
 );
+
+// report the result of the processed jobs that were submitted.  the results
+// of the job should be available via the getResult() method on the job object.
 
 echo "Results:\n";
 

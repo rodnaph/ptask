@@ -2,6 +2,7 @@
 
 namespace Naph\PTask\Server;
 
+use Naph\PTask\Base;
 use Naph\PTask\Processor;
 
 use ZMQ;
@@ -14,8 +15,13 @@ use ZMQ\ZMsg;
  * jobs, then listens for requests to run jobs, passing them back when complete.
  * 
  */
-class Standard implements \Naph\PTask\Server {
+class Standard extends Base implements \Naph\PTask\Server {
 
+    /**
+     * Create a new task server
+     * 
+     * @param Processor $processor
+     */
     public function __construct( Processor $processor ) {
         
         $this->processor = $processor;
@@ -31,7 +37,7 @@ class Standard implements \Naph\PTask\Server {
      */
     public function listen( $port, $workerCount=10 ) {
 
-        echo "\nStarting on port $port with $workerCount workers...\n\n";
+        $this->log( __CLASS__, "Starting server on port $port with $workerCount workers" );
 
         for ( $i=1; $i<=$workerCount; $i++ ) {
 
@@ -40,14 +46,12 @@ class Standard implements \Naph\PTask\Server {
             switch ( $pid ) {
 
                 case -1:
-                    die( 'Forking workder process failed :(' );
+                    $this->log( __CLASS__, 'Forking workder process failed :(' );
+                    exit;
                     break;
 
                 case 0:
-                    while ( true ) {
-                        $this->initAsWorker( $port );
-                        exit;
-                    }
+                    $this->initAsWorker( $port );
                     exit;
                     break;
 
@@ -68,9 +72,9 @@ class Standard implements \Naph\PTask\Server {
      */
     protected function initAsWorker( $port ) {
 
-        $id = rand( 1, 100000 );
+        $id = $this->generateId();
 
-        echo "Worker #$id\n";
+        $this->log( __CLASS__, "Worker #$id started" );
 
         $ctx = new ZMQContext();
 
@@ -83,21 +87,25 @@ class Standard implements \Naph\PTask\Server {
 
             $zmsg->recv();
 
+            $this->log( __CLASS__, "Worker $id received job" );
+
             $job = unserialize( $zmsg->body() );
 
             $this->processor->process( $job );
 
-            echo "#$id Done\n";
+            $this->log( __CLASS__, "Worker #$id finished processing job" );
 
             $zmsg->send(serialize( $job ));
             
         }
 
-        echo "## Worked Finished\n";
-        exit;
-
     }
 
+    /**
+     * Initialise the master server that dispatches job to the worker processes
+     *
+     * @param int $port
+     */
     protected function initAsMaster( $port ) {
 
         $ctx = new ZMQContext();
@@ -108,7 +116,7 @@ class Standard implements \Naph\PTask\Server {
         $workers = $ctx->getSocket( ZMQ::SOCKET_XREQ );
         $workers->bind( 'ipc://workers' );
 
-        echo "Master on $port: push\n";
+        $this->log( __CLASS__, "Master listening on port $port" );
 
         $readable = $writable = array();
         
@@ -126,12 +134,12 @@ class Standard implements \Naph\PTask\Server {
                 $zmsg->recv();
 
                 if ( $socket === $client ) {
-                    echo "\nServer got job\n";
+                    $this->log( __CLASS__, "Master sending job to worker" );
                     $zmsg->set_socket($workers)->send();
                 }
 
                 else if ( $socket === $workers ) {
-                    echo "Job Complete - REPLY TO CLIENT\n";
+                    $this->log( __CLASS__,  "Master sending reply to client" );
                     $zmsg->set_socket( $client )->send();
                 }
                 
