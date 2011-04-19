@@ -3,7 +3,15 @@
 namespace Naph\PTask;
 
 /**
- * Interface for parrallel jobs run in ptask
+ * Interface for parrallel jobs run in ptask.  Jobs can have arbitrary parameters
+ * set on them by either using the get/setParam method or as properties directly.
+ * The job processor can then use these parameters to work out what the job is
+ * meant to do.
+ *
+ * When the job has been processed the result should be set using the setResult()
+ * method, this data can then be accessed by the client application.
+ *
+ * Jobs that throw an error during processing will be returned as null.
  * 
  */
 interface Job {

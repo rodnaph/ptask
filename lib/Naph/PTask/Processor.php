@@ -2,6 +2,11 @@
 
 namespace Naph\PTask;
 
+/**
+ * This class controls processing jobs and is meant to be implemented by the
+ * application using the library.
+ *
+ */
 interface Processor {
 
     /**
