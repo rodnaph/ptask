@@ -4,6 +4,7 @@ namespace Naph\PTask\Runner;
 
 use Naph\PTask\Base;
 use Naph\PTask\Runner;
+use Naph\PTask\Server;
 
 use ZMQ;
 use ZMQContext;
@@ -27,7 +28,7 @@ class Standard extends Base implements Runner {
      *
      * @return array
      */
-    public function run( array $jobs, $port ) {
+    public function run( array $jobs, $port=Server::DEFAULT_PORT ) {
         
         $ctx = new ZMQContext();
         $req = $ctx->getSocket( ZMQ::SOCKET_XREQ );

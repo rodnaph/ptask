@@ -40,4 +40,4 @@ $processor = new ExampleProcessor();
 // to use.  If these die because of fatal errors then they will be restarted (@todo)
 
 $server = new Naph\PTask\Server\Standard( $processor );
-$server->listen( 5555, 2 );
+$server->listen();

@@ -18,8 +18,7 @@ for ( $i=1; $i<=3; $i++ ) {
 
 $runner = new Naph\PTask\Runner\Standard();
 $jobs = $runner->run(
-    $jobs,
-    5555
+    $jobs
 );
 
 // report the result of the processed jobs that were submitted.  the results

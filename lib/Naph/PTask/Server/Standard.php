@@ -4,6 +4,7 @@ namespace Naph\PTask\Server;
 
 use Naph\PTask\Base;
 use Naph\PTask\Processor;
+use Naph\PTask\Server;
 
 use ZMQ;
 use ZMQContext;
@@ -15,7 +16,7 @@ use ZMQ\ZMsg;
  * jobs, then listens for requests to run jobs, passing them back when complete.
  * 
  */
-class Standard extends Base implements \Naph\PTask\Server {
+class Standard extends Base implements Server {
 
     /**
      * Create a new task server
@@ -35,7 +36,7 @@ class Standard extends Base implements \Naph\PTask\Server {
      * @param int $port
      * @param int $workerCount
      */
-    public function listen( $port, $workerCount=10 ) {
+    public function listen( $port=Server::DEFAULT_PORT, $workerCount=Server::DEFAULT_WORKERS ) {
 
         $this->log( __CLASS__, "Starting server on port $port with $workerCount workers" );
 
