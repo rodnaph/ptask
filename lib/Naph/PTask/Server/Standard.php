@@ -70,9 +70,9 @@ class Standard implements \Naph\PTask\Server {
 
         $id = rand( 1, 100000 );
 
-        echo "Worker #$id: pull: $pullPort, push: $pushPort\n";
+        echo "Worker #$id\n";
 
-        $ctx = new ZMQContext( 1 );
+        $ctx = new ZMQContext();
 
         $worker = $ctx->getSocket( ZMQ::SOCKET_XREQ );
         $worker->connect( 'ipc://workers' );
@@ -84,8 +84,6 @@ class Standard implements \Naph\PTask\Server {
             $zmsg->recv();
 
             $job = unserialize( $zmsg->body() );
-
-            echo "#$id Processing for " . $zmsg->address() . "\n";
 
             $this->processor->process( $job );
 
@@ -102,7 +100,7 @@ class Standard implements \Naph\PTask\Server {
 
     protected function initAsMaster( $port ) {
 
-        $ctx = new ZMQContext( 1 );
+        $ctx = new ZMQContext();
 
         $client = $ctx->getSocket( ZMQ::SOCKET_XREP );
         $client->bind( 'tcp://*:' . $port );
@@ -113,17 +111,13 @@ class Standard implements \Naph\PTask\Server {
         echo "Master on $port: push\n";
 
         $readable = $writable = array();
-
-        $poll = new ZMQPoll();
-        $poll->add( $client, ZMQ::POLL_IN );
-        $poll->add( $workers, ZMQ::POLL_IN );
-
-        $addy = array();
-
-        $i = 0;
-
+        
         while ( true ) {
 
+            $poll = new ZMQPoll();
+            $poll->add( $client, ZMQ::POLL_IN );
+            $poll->add( $workers, ZMQ::POLL_IN );
+            
             $poll->poll( $readable, $writable );
 
             foreach ( $readable as $socket ) {
@@ -132,47 +126,15 @@ class Standard implements \Naph\PTask\Server {
                 $zmsg->recv();
 
                 if ( $socket === $client ) {
-
-                    $zmsg->set_socket( $workers );
-
-
-                    //
-                    //  JOBS REQUEST RECEIVED !!!
-                    //
-
-                    $address = $zmsg->address();
-                    $jobs = unserialize( $zmsg->body() );
-
-                    $addy[ $address ] = array( 'jobs' => count($jobs) );
-
-                    echo "\nGot " . count($jobs) . " jobs\n";
-
-                    $zmsg->body_set(serialize( $jobs[0] ));
-                    $zmsg->send();
-
+                    echo "\nServer got job\n";
+                    $zmsg->set_socket($workers)->send();
                 }
 
                 else if ( $socket === $workers ) {
-
-                    $i++;
-echo $zmsg->__toString();
-                    $data = $zmsg->body();
-//print_r( $data );
-            if ( $i == 3 ) {
-
-                    $zmsg->set_socket( $client );
-                    $zmsg->body_set( serialize(array(1,2,3)) );
-                    $zmsg->send();
-            }
-
-                    //
-                    //  WORKER HAS COMPLETED !!!
-                    //
-
-                    //$pull->recv();
-                    echo "** GOT PULL RESPONSE FROM WORKER !!!\n";
-
+                    echo "Job Complete - REPLY TO CLIENT\n";
+                    $zmsg->set_socket( $client )->send();
                 }
+                
             }
             
         }
