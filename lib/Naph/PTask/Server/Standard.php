@@ -19,6 +19,11 @@ use ZMQ\ZMsg;
 class Standard extends Base implements Server {
 
     /**
+     * @var string Unique name for works IPC socket
+     */
+    protected $workersIpcName;
+
+    /**
      * Create a new task server
      * 
      * @param Processor $processor
@@ -26,6 +31,7 @@ class Standard extends Base implements Server {
     public function __construct( Processor $processor ) {
         
         $this->processor = $processor;
+        $this->workersIpcName = 'workers' . $this->generateId();
         
     }
 
@@ -93,7 +99,7 @@ class Standard extends Base implements Server {
         $ctx = new ZMQContext();
 
         $worker = $ctx->getSocket( ZMQ::SOCKET_XREQ );
-        $worker->connect( 'ipc://workers' );
+        $worker->connect( 'ipc://' . $this->workersIpcName );
 
         $zmsg = new ZMsg( $worker );
 
@@ -133,7 +139,7 @@ class Standard extends Base implements Server {
         $client->bind( 'tcp://*:' . $port );
 
         $workers = $ctx->getSocket( ZMQ::SOCKET_XREQ );
-        $workers->bind( 'ipc://workers' );
+        $workers->bind( 'ipc://' . $this->workersIpcName );
 
         $this->log( __CLASS__, "Master listening on port $port" );
 
