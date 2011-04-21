@@ -49,7 +49,7 @@ class Standard extends Base implements Server {
         }
 
         while (pcntl_waitpid(0, $status) != -1) {
-            $this->spawnWorker();
+            $this->spawnWorker( $port );
         }
 
     }
