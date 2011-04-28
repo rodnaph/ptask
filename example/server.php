@@ -9,7 +9,20 @@ use Naph\PTask\Processor;
  * Example class to show how to implement a basic job processor
  * 
  */
-class ExampleProcessor extends Base implements Processor {
+class ExampleProcessor extends \Naph\PTask\Processor\Standard {
+
+    /**
+     * Init time can be used to open database connections and get the class
+     * ready to process jobs.
+     * 
+     */
+    public function init() {
+        
+        $this->log( __CLASS__, 'Initialise processor' );
+
+        srand( rand(1,1000000000) * microtime(true) );
+        
+    }
 
     /**
      * Process a job, just set the result to a message indicating when the job

@@ -45,13 +45,6 @@ class Base {
      */
     protected function generateId() {
 
-        static $randSeeded = false;
-        
-        if ( !$randSeeded ) {
-            srand( rand(1,1000000000) * microtime(true) );
-            $randSeeded = true;
-        }
-
         $id = '';
 
         for ( $i=0; $i<10; $i++ ) {

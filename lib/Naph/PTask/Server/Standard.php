@@ -77,6 +77,7 @@ class Standard extends Base implements Server {
                 break;
 
             case 0:
+                $this->processor->init();
                 $this->initAsWorker( $port );
                 exit;
                 break;
